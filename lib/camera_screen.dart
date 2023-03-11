@@ -19,7 +19,7 @@ class CameraScreen extends StatefulWidget {
 class _CameraScreenState extends State<CameraScreen> {
   late CameraController _controller;
   late Timer _timer;
-  int _countdown = 8;
+  int _countdown = 5;
   late BuildContext _context;
 
   @override
@@ -40,7 +40,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
     // Get available cameras
     List<CameraDescription> cameras = await availableCameras();
-    CameraDescription firstCamera = cameras.first;
+    CameraDescription firstCamera = cameras.last;
 
     // Create a CameraController instance
     _controller = CameraController(
@@ -84,7 +84,7 @@ class _CameraScreenState extends State<CameraScreen> {
           final newPath = '$path/$fileName.jpg';
           await file.saveTo(newPath);
           final result = await GallerySaver.saveImage(newPath);
-          // print('Image saved to gallery: $result');
+          print('Image saved to gallery: $result');
           // Exit the camera screen
           // Navigator.of(context).pop();
         });
@@ -112,19 +112,20 @@ class _CameraScreenState extends State<CameraScreen> {
                     : Container(),
               ),
               // Countdown timer
-              TimerBuilder.periodic(const Duration(seconds: 1),
-                  builder: (context) {
-                if (_countdown == 0) {
-                  return Container();
-                } else {
-                  return Center(
-                    child: Text(
-                      '$_countdown',
-                      style: const TextStyle(fontSize: 64),
-                    ),
-                  );
-                }
-              }),
+              FloatingActionButton(
+                onPressed: () => {
+                  _controller.takePicture().then((XFile file) async {
+                    // Save the file to the device's gallery
+                    final path = (await getTemporaryDirectory()).path;
+                    final fileName = DateTime.now().toString();
+                    final newPath = '$path/$fileName.jpg';
+                    await file.saveTo(newPath);
+                    final result = await GallerySaver.saveImage(newPath);
+                    // Exit the camera screen
+                    // Navigator.of(context).pop();
+                  })
+                },
+              )
             ],
           ),
         ),
